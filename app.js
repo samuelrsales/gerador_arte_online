@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Configuração do multer para fazer o upload dos arquivos
 const upload = multer({ dest: 'uploads/' });
@@ -20,7 +20,6 @@ async function generateProductImage(title, description, imagePath, price, output
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
-    // Template HTML atualizado
     const htmlContent = `
     <!DOCTYPE html>
     <html lang="pt-br">
@@ -54,7 +53,7 @@ async function generateProductImage(title, description, imagePath, price, output
                 </div>
             </div>
 
-            <img src="./novazul.svg" class="w-80 my-10" alt="">
+            <img src="/novazul.svg" class="w-80 my-10" alt="">
 
         </div>
     </body>
@@ -194,27 +193,21 @@ app.post('/generate', upload.single('image'), async (req, res) => {
                         Imagem gerada <br> com sucesso!
                     </h1>
                     
-                    <button class="bg-[#00A890] w-40 h-10 rounded-md font-semibold text-white">
-                        <a href="/">Gerar outra arte</a>
+                    <button class="bg-[#00A890] text-white px-5 py-1 rounded-md w-20 h-10">
+                        <a href="/">Voltar</a>
                     </button>
                 </div>
-            
-                <div class="w-full h-full flex justify-center items-center">
-                    <img class="w-60" src="/${path.basename(outputFilePath)}" alt="${title}" style="max-width: 100%; height: auto;"/><br><br>
+                <div>
+                    <img class="max-w-md" src="${outputFilePath}" alt="Imagem do Produto">
                 </div>
             </section>
-            
         </body>
-
         </html>
         `);
     } catch (error) {
-        res.status(500).send('Erro ao gerar imagem.');
+        res.status(500).send('Erro ao gerar a imagem: ' + error.message);
     }
 });
-
-// Servir os arquivos estáticos da pasta 'artes'
-app.use(express.static(path.join(__dirname, 'artes')));
 
 // Inicializa o servidor
 app.listen(port, () => {
